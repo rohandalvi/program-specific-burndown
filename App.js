@@ -229,22 +229,22 @@ Ext.define('CustomApp', {
                 console.log('End date ',that.end); 
     			
     			setOfStories = results[1];
-    			var candidateStories = _.each(results[1], function(story){return _.each(results[0],function(f){return f.get("ObjectID") === story.get("Feature").ObjectID;});});
-    			console.log('# candidates ', candidateStories.length, candidateStories);
+    			var f_oid = _.map(setOfFeatures, function(f){return f.get("ObjectID");});
+    			var s_oid = _.map(setOfStories, function(f){return f.get("Feature").ObjectID; });
     			
+    			var intersection = _.intersection(f_oid, s_oid);
+    			console.log('cc ',intersection);
+    			//var candidateStories = _.each(results[0], function(f){ _.each(results[1],function(story){_.filter});});
+    			//console.log('# candidates ', candidateStories.length, candidateStories);
     			
+    			//that.getStorySnapShotsForFeatures(setOfFeatures,setOfStories)
     			//create snapshot store based on candidateStories.
     			
     			
     		});
     		
     		
-    		/*
-    		 * up next
-    		 * 5 - Filter the set of returned stories to the set of features (using the Feature attribute on stories).
-    		 *  
-    		 * You may be able to use the underscore _.filter() and/or _.intersection() to make this easier.
-    		 */
+    		
     		
     		
     		
