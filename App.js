@@ -146,14 +146,7 @@ Ext.define('CustomApp', {
     		}
     	},
     	
-    	filterFeatureStory: function(feature){
-    		if(feature!=null || setOfStories!=null){
-    			console.log('feature name is ', feature.get("Name"));
-    			
-    			var candidateStories = _.filter(setOfStories, function(story){return feature.get("Name") == story.get("Feature");});
-				console.log('candidateStories # ', candidateStories.length);
-    		}
-    	},
+    	
     	
     	queryFeatures: function(iterations){
     		var that = this;
@@ -229,14 +222,19 @@ Ext.define('CustomApp', {
     			that.StartDate = that.startDate(iterations);
     			that.start = _.min(_.pluck(iterations,function(r) { return r.get("StartDate");}));
     			isoStart = new lumenize.Time(that.start).getISOStringInTZ("America/Chicago");
+                
                 console.log("isoStart1",isoStart);
                 that.end   = _.max(_.pluck(iterations,function(r) { return r.get("EndDate");}));
                 that.iterations = iterations;
                 console.log('End date ',that.end); 
     			
     			setOfStories = results[1];
-    			var candidateStories = _.each(results[1], function(story){_.each(results[0],function(f){return f.get("ObjectID") == story.get("Feature").ObjectID;});});
+    			var candidateStories = _.each(results[1], function(story){return _.each(results[0],function(f){return f.get("ObjectID") === story.get("Feature").ObjectID;});});
     			console.log('# candidates ', candidateStories.length, candidateStories);
+    			
+    			
+    			//create snapshot store based on candidateStories.
+    			
     			
     		});
     		
