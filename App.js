@@ -223,6 +223,7 @@ Ext.define('CustomApp', {
     		async.map(configs, this.wsapiQuery, function(err,results){
     			
     			setOfFeatures = results[0];
+    			_.each(results[0], function(f){console.log('f',f.get("ObjectID"));});
     			//console.log('sets ',setOfFeatures.length);
     			console.log("# features",setOfFeatures.length,setOfFeatures);
     			that.StartDate = that.startDate(iterations);
@@ -234,8 +235,8 @@ Ext.define('CustomApp', {
                 console.log('End date ',that.end); 
     			
     			setOfStories = results[1];
-    			console.log('stores ',setOfStories.length);
-    			
+    			var candidateStories = _.each(results[1], function(story){_.each(results[0],function(f){return f.get("ObjectID") == story.get("Feature").ObjectID;});});
+    			console.log('# candidates ', candidateStories.length, candidateStories);
     			
     		});
     		
