@@ -229,15 +229,29 @@ Ext.define('CustomApp', {
                 console.log('End date ',that.end); 
     			
     			setOfStories = results[1];
+    			var stories = _.map(setOfStories, function(story){return {name: story.get("Name"),fid: story.get("Feature").ObjectID, objectid: story.get("ObjectID")};});
+    			console.log('stories ',stories);
+    			
+    			var features = _.map(setOfFeatures, function(feature){return {name: feature.get("Name"), fid: feature.get("ObjectID")};});
+    			console.log('features ',features);
     			var f_oid = _.map(setOfFeatures, function(f){return f.get("ObjectID");});
     			var s_oid = _.map(setOfStories, function(f){return f.get("Feature").ObjectID; });
-    			
+    			console.log('sos ',setOfFeatures.ObjectID);
     			var intersection = _.intersection(f_oid, s_oid);
     			console.log('cc ',intersection);
-    			//var candidateStories = _.each(results[0], function(f){ _.each(results[1],function(story){_.filter});});
-    			//console.log('# candidates ', candidateStories.length, candidateStories);
+
+    			var candidateStories = [];
+    			_.each(stories, function(story){_.each(features, function(feature){
+    				
+    				if(story.fid == feature.fid){
+    					candidateStories.push(story);    				
+    					}
+    			});});
     			
-    			//that.getStorySnapShotsForFeatures(setOfFeatures,setOfStories)
+    			console.log('candidate stories ',candidateStories.length,candidateStories);
+
+    			
+    			that.getStorySnapShotsForFeatures();
     			//create snapshot store based on candidateStories.
     			
     			
@@ -249,6 +263,10 @@ Ext.define('CustomApp', {
     		
     		
     },
+    getStorySnapShotsForFeatures: function(){
+    	
+    },
+    
     startDate: function(iterations){
     	var start = _.min(_.pluck(iterations, function(r){return r.get("StartDate");}));
     	return Rally.util.DateTime.toIsoString(start, false);

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Random App Name24436</title>
+    <title>Program-specific-burndown</title>
 
     <script type="text/javascript" src="/apps/2.0rc1/sdk.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/async/1.22/async.min.js"></script>
@@ -157,14 +157,7 @@ Ext.define('CustomApp', {
     		}
     	},
     	
-    	filterFeatureStory: function(feature){
-    		if(feature!=null || setOfStories!=null){
-    			console.log('feature name is ', feature.get("Name"));
-    			
-    			var candidateStories = _.filter(setOfStories, function(story){return feature.get("Name") == story.get("Feature");});
-				console.log('candidateStories # ', candidateStories.length);
-    		}
-    	},
+    	
     	
     	queryFeatures: function(iterations){
     		var that = this;
@@ -234,30 +227,50 @@ Ext.define('CustomApp', {
     		async.map(configs, this.wsapiQuery, function(err,results){
     			
     			setOfFeatures = results[0];
+    			_.each(results[0], function(f){console.log('f',f.get("ObjectID"));});
     			//console.log('sets ',setOfFeatures.length);
-    			console.log("# features",setOfFeatures.length,features);
+    			console.log("# features",setOfFeatures.length,setOfFeatures);
     			that.StartDate = that.startDate(iterations);
     			that.start = _.min(_.pluck(iterations,function(r) { return r.get("StartDate");}));
     			isoStart = new lumenize.Time(that.start).getISOStringInTZ("America/Chicago");
+                
                 console.log("isoStart1",isoStart);
                 that.end   = _.max(_.pluck(iterations,function(r) { return r.get("EndDate");}));
                 that.iterations = iterations;
                 console.log('End date ',that.end); 
     			
     			setOfStories = results[1];
-    			console.log('stores ',setOfStories.length);
+    			var stories = _.map(setOfStories, function(story){return {name: story.get("Name"),fid: story.get("Feature").ObjectID, objectid: story.get("ObjectID")};});
+    			console.log('stories ',stories);
+    			
+    			var features = _.map(setOfFeatures, function(feature){return {name: feature.get("Name"), fid: feature.get("ObjectID")};});
+    			console.log('features ',features);
+    			var f_oid = _.map(setOfFeatures, function(f){return f.get("ObjectID");});
+    			var s_oid = _.map(setOfStories, function(f){return f.get("Feature").ObjectID; });
+    			console.log('sos ',setOfFeatures.ObjectID);
+    			var intersection = _.intersection(f_oid, s_oid);
+    			console.log('cc ',intersection);
+    			
+    			
+    			// var candidateStories = _.each(results[0], function(f){ _.each(results[1],function(story){_.filter(f.get("ObjectID") == story.get("Feature").ObjectID);});});
+    			// console.log('# candidates ', candidateStories.length, candidateStories);
+    			
+    			that.getStorySnapShotsForFeatures();
+    			//create snapshot store based on candidateStories.
     			
     			
     		});
     		
-    	
-        
-        	//storing stories in setOfStories.
+    		
     		
     		
     		
     		
     },
+    getStorySnapShotsForFeatures: function(){
+    	
+    },
+    
     startDate: function(iterations){
     	var start = _.min(_.pluck(iterations, function(r){return r.get("StartDate");}));
     	return Rally.util.DateTime.toIsoString(start, false);
@@ -577,7 +590,7 @@ function getReleaseTimeBox(app) {
 });
 
             Rally.launchApp('CustomApp', {
-                name:"Random App Name24436",
+                name:"Program-specific-burndown",
 	            parentRepos:""
             });
 
