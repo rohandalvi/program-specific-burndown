@@ -57,6 +57,7 @@ Ext.define('CustomApp', {
             model : config.model,
             fetch : config.fetch,
             filters : config.filters,
+            context: config.context,
             listeners : {
                 scope : this,
                 load : function(store, data) {
@@ -202,7 +203,16 @@ Ext.define('CustomApp', {
     				property: 'Iteration.Name',
     				operator: '=',
     				value: iterationComboValue
+    			},
+    			{ //for the sake of temporarily avoiding the error, querying for only those stories having features
+    				property: 'Feature',
+    				operator: '!=',
+    				value: null
     			}],
+    			context:{ //adding context while querying stories 
+    				workspace: '/workspace/3181574357', //USD
+    				project: '/project/6020936452' //USD Prtfolio
+    			},
     			listeners: {
     				load: function(store, stories){
     					setOfStories = stories;
@@ -226,9 +236,10 @@ Ext.define('CustomApp', {
     			
     			setOfStories = results[1];
     			var stories = _.map(setOfStories, function(story){return {name: story.get("Name"),fid: story.get("Feature").ObjectID, objectid: story.get("ObjectID")};});
-    			
+    			//printing stories, count is 104.
+    			console.log('# stories ',setOfStories.length,setOfStories);
     			var features = _.map(setOfFeatures, function(feature){return {name: feature.get("Name"), fid: feature.get("ObjectID")};});
-    			
+    			//still no intersection between current project's features and stories from USD Prtfolio.
     			var candidateStories = [];
     			_.each(stories, function(story){_.each(features, function(feature){
     				
@@ -241,54 +252,16 @@ Ext.define('CustomApp', {
 
     			if(candidateStories!=null){
     			
-    			that.getStorySnapShotsForFeatures(candidateStories);
+    			that.getStorySnapShotsForFeatures();
     			}
     			//create snapshot store based on candidateStories.
-
+    			
+    			
     		});
 
     },
-    getStorySnapShotsForFeatures: function(stories){
+    getStorySnapShotsForFeatures: function(){
     	
-    	var snapshots = [];
-    	
-    	var that = this;
-    	
-    	async.map(stories, this.readStorySnapshots,function(err,results){
-    		
-    		console.log('results ',results);
-    	});
-    	
-    	
-    	
-    	
-    },
-    
-    readStorySnapshots: function(parent,callback){
-    	console.log('inside story snapshots ');
-    	Ext.create('Rally.data.lookback.SnapshotStore',{
-    		limit: 'Infinity',
-    		autoLoad: true,
-    		listeners:{
-    			scope: this,
-    			load: function(store,data,success){
-    				callback(null,data);
-    			}
-    			
-    		},
-    		fetch: ['ObjectID'],
-    		filters:[{
-    			property: 'ObjectID',
-    			operator: 'in',
-    			value: ['ObjectID']
-    		},
-    		{
-    			property: '__At',
-    			operator: '=',
-    			value: 'current'
-    		}]
-    		
-    	});
     },
     
     startDate: function(iterations){
