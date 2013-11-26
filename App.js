@@ -29,11 +29,19 @@ Ext.define('CustomApp', {
         var configs = [];
         
         configs.push({ model : "Release",             
-                       fetch : ['Name', 'ObjectID', 'Project', 'ReleaseStartDate', 'ReleaseDate' ], 
+                       fetch : ['Name', 'ObjectID', 'Project', 'ReleaseStartDate', 'ReleaseDate' ],
+                       context:{ //adding context while querying stories 
+		    				workspace: '/workspace/3181574357', //USD
+		    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
+		    			}, 
                        filters:[] 
         });
         configs.push({ model : "Iteration",             
                        fetch : ['Name', 'ObjectID', 'Project', 'StartDate', 'EndDate' ], 
+                       context:{ //adding context while querying stories 
+		    				workspace: '/workspace/3181574357', //USD
+		    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
+		    			},
                        filters:[] 
         });
         
@@ -110,6 +118,7 @@ Ext.define('CustomApp', {
         		queryMode: 'local',
         		displayField: 'name',
         		valueField: 'name',
+        		
         		listeners:{
         			scope: this,
         			change: function(field, eOpts){
@@ -139,7 +148,7 @@ Ext.define('CustomApp', {
     		});
     		if(r.length>0){
     			myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
-                myMask.show();
+               // myMask.show();
                 
                 this.selectedIterations = r;
                 this.queryFeatures(r);
@@ -179,6 +188,10 @@ Ext.define('CustomApp', {
     			model: 'PortfolioItem/Feature',
     			fetch: ['ObjectID','FormattedID','UserStories' ],
     			filters: [filter],
+    			context:{ //adding context while querying stories 
+    				workspace: '/workspace/3181574357', //USD
+    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
+    			},
     			listeners: {
                 load: function(store, features) {
                 	setOfFeatures = features;
@@ -211,7 +224,7 @@ Ext.define('CustomApp', {
     			}],
     			context:{ //adding context while querying stories 
     				workspace: '/workspace/3181574357', //USD
-    				project: '/project/6020936452' //USD Prtfolio
+    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
     			},
     			listeners: {
     				load: function(store, stories){
