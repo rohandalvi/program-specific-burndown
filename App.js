@@ -39,11 +39,12 @@ Ext.define('CustomApp', {
         configs.push({ model : "Iteration",             
                        fetch : ['Name', 'ObjectID', 'Project', 'StartDate', 'EndDate' ], 
                        context:{ //adding context while querying stories 
-		    				workspace: '/workspace/3181574357', //USD
-		    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
+		    				workspace: '/workspace/2154600806', //USD
+		    				project: '/project/11838764022' //USD Prtfolio:6020936452 , Teams: 14355819910
 		    			},
                        filters:[] 
         });
+        
         
         async.map( configs, this.wsapiQuery, function(err,results) {
            
@@ -52,7 +53,7 @@ Ext.define('CustomApp', {
            
             if (showAssignedProgram)
                 that.createAssignedProgramCombo();
-           
+           		
            		that.createIterationCombo(that.iterations);
         });
         
@@ -149,10 +150,8 @@ Ext.define('CustomApp', {
     		if(r.length>0){
     			myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Please wait..."});
                // myMask.show();
-                
                 this.selectedIterations = r;
                 this.queryFeatures(r);
-                
     		}
     	},
     	
@@ -187,11 +186,8 @@ Ext.define('CustomApp', {
     		configs.push({
     			model: 'PortfolioItem/Feature',
     			fetch: ['ObjectID','FormattedID','UserStories' ],
-    			filters: [filter],
-    			context:{ //adding context while querying stories 
-    				workspace: '/workspace/3181574357', //USD
-    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
-    			},
+    			filters: [],//filter
+    			
     			listeners: {
                 load: function(store, features) {
                 	setOfFeatures = features;
@@ -223,8 +219,8 @@ Ext.define('CustomApp', {
     				value: null
     			}],
     			context:{ //adding context while querying stories 
-    				workspace: '/workspace/3181574357', //USD
-    				project: '/project/14355819910' //USD Prtfolio:6020936452 , Teams: 14355819910
+    				workspace: '/workspace/2154600806', //USD:3181574357, Workspace1: 2154600806
+    				project: '/project/11838764022' //USD Prtfolio:6020936452 , Teams: 14355819910, Ray-test: 11838764022
     			},
     			listeners: {
     				load: function(store, stories){
