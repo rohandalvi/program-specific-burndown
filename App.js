@@ -534,7 +534,7 @@ Ext.define('CustomApp', {
                 chart: {
                 },
                 title: {
-                text: 'PSI Feature Burnup',
+                text: 'Program Specific Burnup',
                 x: -20 //center
                 },
                 plotOptions: {
@@ -560,7 +560,7 @@ Ext.define('CustomApp', {
                         text:  'Points'
                     },
                     plotLines: [{
-                        value: 0,
+                        value: 0,//_.max(series[0],function(series){return series.data;}),
                         width: 1,
                         color: '#808080'
                     }]
