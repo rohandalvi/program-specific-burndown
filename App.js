@@ -122,6 +122,37 @@ Ext.define('CustomApp', {
         });
         this.add(this.assignedProgramCombo);
     },
+    createTypeChooser : function() {
+        
+        this.chooser = Ext.create( 'Ext.form.FieldContainer', {
+            columnWidth : .25,
+            labelStyle: 'padding-left:10px;',
+            fieldLabel : 'Type',
+            defaultType: 'radiofield',
+            defaults: {
+                flex: 1
+            },
+            layout: 'hbox',
+            value : 'points',
+            items: [
+                {
+                    boxLabel  : 'Points',
+                    name      : 'Type',
+                    inputValue: 0,
+                    id        : 'radio4',
+                    
+                }, {
+                    boxLabel  : 'Count',
+                    name      : 'Type',
+                    inputValue: 1,
+                    id        : 'radio5',
+                }
+            ]
+        });
+        
+        this.chooser.items.items[0].setValue(true);
+        this.add(this.chooser);
+    },
     
     	createIterationCombo: function(iterationRecords){
     		
@@ -335,7 +366,7 @@ Ext.define('CustomApp', {
         // can be used to 'knockout' holidays
         var holidays = [
         ];
-        var myCalc = Ext.create("storycalculator");
+        var myCalc = Ext.create("MyStoryCalculator");
 
         // calculator config
         var config = {
@@ -358,10 +389,10 @@ Ext.define('CustomApp', {
         
         // create a high charts series config object, used to get the hc series data
         var hcConfig = [{ name : "label" }, 
-                        this.pointsUnitType() ? { name : "Planned Points" } : { name : "Planned Count" }, 
+                         { name : "Planned Points" } , 
                         { name : "PreliminaryEstimate"},
-                        this.pointsUnitType() ? { name : "Accepted Points"} : { name : "Accepted Count"},
-                        this.pointsUnitType() ? { name : "ProjectionPoints"}: { name : "ProjectionCount"},
+                         { name : "Accepted Points"} ,
+                        { name : "ProjectionPoints"}
                         // { name : "Count", type:'column'},
                         // { name : "Completed",type:'column'} 
                         ];
@@ -369,11 +400,45 @@ Ext.define('CustomApp', {
         
         this._showChart(hc);
     },
+    pointsUnitType: function() {
+
+        return this.chooser.items.items[0].getValue()==true;
+
+    },
+    createPlotLines : function(seriesData) { 
+        // filter the iterations
+        var start = new Date( Date.parse(seriesData[0]));
+        var end   = new Date( Date.parse(seriesData[seriesData.length-1]));
+        var releaseI = _.filter(this.iterations,function(i) { return i.get("EndDate") >= start && i.get("EndDate") <= end;});
+        releaseI = _.uniq(releaseI,function(i) { return i.get("Name");});
+        var itPlotLines = _.map(releaseI, function(i){
+            var d = new Date(Date.parse(i.raw.EndDate)).toISOString().split("T")[0];
+            return {
+                label : i.get("Name"),
+                dashStyle : "Dot",
+                color: 'grey',
+                width: 1,
+                value: _.indexOf(seriesData,d)
+            }; 
+        });
+        // create release plot lines        
+        var rePlotLines = _.map(this.selectedReleases, function(i){
+            var d = new Date(Date.parse(i.raw.ReleaseDate)).toISOString().split("T")[0];
+            return {
+                label : i.get("Name"),
+                // dashStyle : "Dot",
+                color: 'grey',
+                width: 1,
+                value: _.indexOf(seriesData,d)
+            }; 
+        });
+        return itPlotLines.concat(rePlotLines);
+    },
+
     readFeatureSnapshots : function(feature,callback) {
     	
         var that = this;
         countFeatures++;
-        console.log("count is ",feature);
         feature.getCollection("UserStories").load({
             fetch : ["ObjectID"],
             callback : function(records,operation,success) {
@@ -436,6 +501,83 @@ Ext.define('CustomApp', {
         });
 
     },
+    isoReleaseStartDate : function(releases) {
+        var start = _.min(_.pluck(releases,function(r) { return r.get("ReleaseStartDate");}));
+        return Rally.util.DateTime.toIsoString(start, false);
+    },
+
+    _showChart : function(series) {
+        var that = this;
+        var chart = this.down("#chart1");
+        myMask.hide();
+        if (chart !== null)
+            chart.removeAll();
+            
+        // create plotlines
+        var plotlines = this.createPlotLines(series[0].data);
+        
+        // set the tick interval
+        var tickInterval = series[1].data.length <= (7*20) ? 7 : (series[1].data.length / 20);
+
+        // series[1].data = _.map(series[1].data, function(d) { return _.isNull(d) ? 0 : d; });
+
+        var extChart = Ext.create('Rally.ui.chart.Chart', {
+            columnWidth : 1,
+            itemId : "chart1",
+            chartData: {
+                categories : series[0].data,
+                series : series.slice(1, series.length)
+            },
+            chartColors: ['Gray', 'Orange', 'Green', 'LightGray', 'Blue','Green'],
+
+            chartConfig : {
+                chart: {
+                },
+                title: {
+                text: 'PSI Feature Burnup',
+                x: -20 //center
+                },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            radius: 2
+                        }
+                    }
+                },
+                xAxis: {
+                    plotLines : plotlines,
+                    //tickInterval : 7,
+                    tickInterval : tickInterval,
+                    type: 'datetime',
+                    labels: {
+                        formatter: function() {
+                            return Highcharts.dateFormat('%b %d', Date.parse(this.value));
+                        }
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text:  'Points'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                tooltip: {
+                },
+                legend: { align: 'center', verticalAlign: 'bottom' }
+            }
+        });
+        this.add(extChart);
+        chart = this.down("#chart1");
+        var p = Ext.get(chart.id);
+        elems = p.query("div.x-mask");
+        _.each(elems, function(e) { e.remove(); });
+        var elems = p.query("div.x-mask-msg");
+        _.each(elems, function(e) { e.remove(); });
+    }
     
     	
 });
